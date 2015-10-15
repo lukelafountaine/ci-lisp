@@ -6,7 +6,7 @@ program ::= program s-expr
 
 s-expr ::= number | ( func s-expr ) | ( func s-expr s-expr )
 
-number ::= [ + | - ] digit+ [ . digit+ ] 
+number ::= [ + | - ] digit+ [ . digit+ ]
 
 digit ::= 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
 
@@ -30,41 +30,40 @@ digit ::= 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
 
 %%
 
-program:/* empty */ { 
+program:/* empty */ {
                        printf("> ");
                     }
         | program s_expr EOL {
-                              // printf("> "); 
-                              // printf("yacc: program expr\n"); 
-                              printf("%lf\n> ", $2); 
+                              // printf("> ");
+                              // printf("yacc: program expr\n");
+                              printf("%lf\n> ", $2);
                            }
         ;
 
 s_expr:
-        NUMBER { 
-                  // printf("yacc: NUMBER\n"); 
-                  $$ = $1; 
+        NUMBER {
+                  // printf("yacc: NUMBER\n");
+                  $$ = $1;
                }
-        | LPAREN FUNC s_expr RPAREN { 
-                                     // printf("yacc: LPAREN FUNC expr RPAREN\n"); 
-                                     $$ = calc($2, $3, 0);  
+        | LPAREN FUNC s_expr RPAREN {
+                                     // printf("yacc: LPAREN FUNC expr RPAREN\n");
+                                     $$ = calc($2, $3, 0);
                                      // printf(" result = %lf", $$);
                                   }
         | LPAREN FUNC s_expr s_expr RPAREN {
                                           // printf("LPAREN FUNC expr expr RPAREN\n"); 
-                                          $$ = calc($2, $3, $4); 
+                                          $$ = calc($2, $3, $4);
                                           // printf("%lf", $$);
                                        }
-        | QUIT { 
-                  //printf("QUIT\n"); 
+        | QUIT {
+                  //printf("QUIT\n");
                   exit(0);
                }
-        
-        | error { 
-                        printf("error\n"); 
+
+        | error {
+                        printf("error\n");
                         printf("> ");
                     }
 
         ;
 %%
-
