@@ -13,6 +13,8 @@ int yyparse(void);
 int yylex(void);
 void yyerror(char *);
 
+typedef enum {NEG = 0, ABS, EXP, SQRT, ADD, SUB, MULT, DIV, MOD, LOG, POW, MAX, MIN, EXP2, CBRT, HYPOT} FUNC_NAMES;
+
 // function to calculate expressions
 double calc(char *, double, double);
 
