@@ -14,6 +14,8 @@ int yylex(void);
 void yyerror(char *);
 
 typedef enum { NUM_TYPE, FUNC_TYPE } AST_NODE_TYPE;
+typedef enum {NEG = 0, ABS, EXP, SQRT, EXP2, CBRT, ADD, SUB, MULT, DIV, MOD, LOG, POW, MAX, MIN, HYPOT} FUNC_NAMES;
+extern char *arithmeticOps;
 
 typedef struct
 {

@@ -1,5 +1,6 @@
 #include "l8t3.h"
 
+char *arithmeticOps = "+-*/";
 int main(void)
 {
     yyparse();
@@ -14,14 +15,14 @@ void yyerror(char *s)
 // find out which function it is
 int resolveFunc(char *func)
 {
-   char *funcs[] = { "neg", "abs", "exp", "sqrt", "add", "sub", "mult", "div", "remainder", "log", "pow", "max", "min", ""};
-   
+   char *funcs[] = { "neg", "abs", "exp", "sqrt", "exp2", "cbrt", "add", "sub", "mult", "div", "remainder", "log", "pow", "max", "min", ""};
+
    int i = 0;
    while (funcs[i][0] !='\0')
    {
       if (!strcmp(funcs[i], func))
          return i;
-         
+
       i++;
    }
    yyerror("invalid function"); // paranoic -- should never happen
@@ -69,14 +70,14 @@ void freeNode(AST_NODE *p)
 {
     if (!p)
        return;
-       
+
     if (p->type == FUNC_TYPE)
     {
         free(p->data.function.name);
         freeNode(p->data.function.op1);
         freeNode(p->data.function.op2);
     }
-        
+
     free (p);
 }
 
@@ -84,8 +85,49 @@ void translate(AST_NODE *p)
 {
    if (!p)
       return;
-      
-// TBD: implement
 
-}  
+   else if (p->type == NUM_TYPE)
+      printf("%f ", p->data.number.value);
 
+   else if (p->type == FUNC_TYPE)
+   {
+     int funcType = resolveFunc(p->data.function.name);
+     switch (funcType)
+     {
+       case NEG:
+       case ABS:
+       case EXP:
+       case SQRT:
+       case EXP2:
+       case CBRT:
+        printf("%s( ", p->data.function.name);
+        translate(p->data.function.op1);
+        printf(") ");
+        break;
+       case ADD:
+       case SUB:
+       case MULT:
+       case DIV:
+        printf("( ");
+        translate(p->data.function.op1);
+        printf("%c ", arithmeticOps[funcType-ADD]);
+        translate(p->data.function.op2);
+        printf(") ");
+        break;
+       case MOD:
+       case LOG:
+       case POW:
+       case MAX:
+       case MIN:
+       case HYPOT:
+        printf("%s( ", p->data.function.name);
+        translate(p->data.function.op1);
+        printf(", ");
+        translate(p->data.function.op2);
+        printf(") ");
+        break;
+     }
+
+   }
+
+}

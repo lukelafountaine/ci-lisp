@@ -1,2 +1,4 @@
 # debugging info
 *.dSYM
+y.*
+lex.*

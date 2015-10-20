@@ -6,7 +6,7 @@
 
 digit [0-9]
 number {digit}+(\.{digit}+)?
-func "neg"|"abs"|"exp"|"sqrt"|"add"|"sub"|"mult"|"div"|"remainder"|"log"|"pow"|"max"|"min"
+func "neg"|"abs"|"exp"|"sqrt"|"add"|"sub"|"mult"|"div"|"remainder"|"log"|"pow"|"max"|"min"|"exp2"|"cbrt"|"hypot"
 
 %%
 
@@ -25,16 +25,16 @@ func "neg"|"abs"|"exp"|"sqrt"|"add"|"sub"|"mult"|"div"|"remainder"|"log"|"pow"|"
                 return FUNC;
             }
 
-"("         { 
-                //printf("lex: LPAREN\n"); 
+"("         {
+                //printf("lex: LPAREN\n");
                 return LPAREN;
             }
-")"         { 
-                //printf("lex: RPAREN\n"); 
+")"         {
+                //printf("lex: RPAREN\n");
                 return RPAREN;
             }
 "\n"        {
-                //printf("lex: RPAREN\n"); 
+                //printf("lex: RPAREN\n");
                 return EOL;
             }
 
