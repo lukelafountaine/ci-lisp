@@ -35,8 +35,8 @@ program:/* empty */ {
                        printf("> ");
                     }
         | program s_expr EOL {
-                              // printf("yacc: program expr\n");
-                              translate($2);
+                              //printf("yacc: program expr\n");
+                              printf("\n%f", eval($2));
                               freeNode($2);
                               printf("\n> ");
                            }

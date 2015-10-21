@@ -43,6 +43,6 @@ AST_NODE *number(double value);
 AST_NODE *function(char *funcName, AST_NODE *op1, AST_NODE *op2);
 void freeNode(AST_NODE *p);
 
-void translate(AST_NODE *ast);
+double eval(AST_NODE *ast);
 
 #endif
