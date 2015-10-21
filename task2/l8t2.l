@@ -1,12 +1,12 @@
 %option noyywrap
 
 %{
-    #include "l8t1.h"
+    #include "l8t2.h"
 %}
 
 digit [0-9]
 number {digit}+(\.{digit}+)?
-func "neg"|"abs"|"exp"|"sqrt"|"add"|"sub"|"mult"|"div"|"remainder"|"log"|"pow"|"max"|"min"
+func "neg"|"abs"|"exp"|"sqrt"|"add"|"sub"|"mult"|"div"|"remainder"|"log"|"pow"|"max"|"min"|"exp2"|"cbrt"|"hypot"
 
 %%
 
