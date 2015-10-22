@@ -1,0 +1,2 @@
+Using the same starting point as for Task 3, implement a function eval() that should evaluate the abstract syntax tree de facto executing compiled s-expressions. eval() should replace the translate() function.
+Please note the difference between the interpreter that you implemented in Task 1 and the compiler here. The AST is basically an executable that you could save and execute at some later time; that's obviously not the case with the interpreter that needs to carry out syntax analysis each time it is run.
