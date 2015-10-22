@@ -4,7 +4,15 @@ s-expressions calculator
 
 program ::= program s-expr
 
-s-expr ::= number | ( func s-expr ) | ( func s-expr s-expr )
+s-expr ::= number | ( func s-expr ) | ( func s-expr s-expr ) | ( ( let let_list ) s_expr )
+
+let_list ::= let_elem | let_list let_elem
+
+let_elem ::= ( symbol s_expr )
+
+symbol ::= letter+
+
+letter ::= [a-zA-Z]
 
 number ::= [ + | - ] digit+ [ . digit+ ]
 
