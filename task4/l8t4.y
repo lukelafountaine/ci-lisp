@@ -48,12 +48,12 @@ s_expr:
                   $$ = number($1);
                }
         | LPAREN FUNC s_expr RPAREN {
-                                     // printf("yacc: LPAREN FUNC expr RPAREN\n");
+                                     //printf("yacc: LPAREN FUNC expr RPAREN\n");
                                      $$ = function($2, $3, 0);
                                      //printf("%s(%lf)", $2, $3);
                                   }
         | LPAREN FUNC s_expr s_expr RPAREN {
-                                          // printf("LPAREN FUNC expr expr RPAREN\n");
+                                          //printf("LPAREN FUNC expr expr RPAREN\n");
                                           // $$ = calc($2, $3, $4);
                                           $$ = function($2, $3, $4);
                                        }
