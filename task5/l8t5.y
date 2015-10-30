@@ -44,67 +44,76 @@ digit ::= 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
 program:/* empty */ {
                        printf("> ");
                     }
-        | program s_expr EOL {
-                              printf("yacc: program expr\n");
-                              //printf("\n%f", eval($2));
-                              //freeNode($2);
-                              printf("\n> ");
-                           }
-        ;
+        | program s_expr EOL
+          {
+          //printf("yacc: program expr\n");
+          printf("\n%f", eval($2));
+          freeNode($2);
+          printf("\n> ");
+          }
+          ;
 
 s_expr:
-        NUMBER {
-                  printf("NUMBER%lf\n", $1);
-                  //$$ = number($1);
-               }
-
-        | SYMBOL {
-                  printf("SYMBOL");
-                  //$$ = symbol($1)
+        NUMBER
+        {
+          //printf("NUMBER%lf\n", $1);
+          //$$ = number($1);
         }
-        | LPAREN FUNC s_expr RPAREN {
-                                     printf("yacc: LPAREN FUNC expr RPAREN\n");
-                                     //$$ = function($2, $3, 0);
-                                     //printf("%s(%lf)", $2, eval($3));
-                                  }
-        | LPAREN FUNC s_expr s_expr RPAREN {
-                                          printf("LPAREN FUNC expr expr RPAREN\n");
-                                          // $$ = calc($2, $3, $4);
-                                          //$$ = function($2, $3, $4);
-                                       }
-        | LPAREN LPAREN LET let_list RPAREN s_expr RPAREN {
-                                          printf("LPAREN LPAREN LET let_list RPAREN s_expr RPAREN\n");
-                                          //$$ = let($4, $6);
-                                                      }
-        | QUIT {
-                  printf("QUIT\n");
-                  exit(0);
-               }
 
-        | error {
-                  printf("error\n");
-                  //printf("> ");
-                }
+        | SYMBOL
+        {
+          //printf("SYMBOL");
+          $$ = symbol($1)
+        }
+        | LPAREN FUNC s_expr RPAREN
+        {
+          //printf("yacc: LPAREN FUNC s_expr RPAREN\n");
+          $$ = function($2, $3, 0);
+          //printf("%s(%lf)", $2, eval($3));
+        }
+        | LPAREN FUNC s_expr s_expr RPAREN
+        {
+          printf("LPAREN FUNC s_expr s_expr RPAREN\n");
+          //$$ = calc($2, $3, $4);
+          $$ = function($2, $3, $4);
+        }
+        | LPAREN LPAREN LET let_list RPAREN s_expr RPAREN
+        {
+          printf("LPAREN LPAREN LET let_list RPAREN s_expr RPAREN\n");
+          $$ = let($4, $6);
+        }
+        | QUIT
+        {
+          printf("QUIT\n");
+          exit(0);
+        }
+
+        | error
+        {
+          printf("error\n");
+          //printf("> ");
+        }
         ;
 
 let_list:
         let_elem
         {
           printf("let_elem\n");
-          //$$ = let_list($1, NULL);
+          $$ = let_list($1, NULL);
         }
 
-        | let_list let_elem {
+        | let_list let_elem
+        {
             printf("let_list let_elem\n");
-            //$$ = let_list($2, $1);
-            }
+            $$ = let_list($2, $1);
+        }
         ;
 
 let_elem:
         LPAREN SYMBOL s_expr RPAREN
         {
           printf("LPAREN SYMBOL s_expr RPAREN\n");
-          //$$ = let_elem($2, $3);
+          $$ = let_elem($2, $3);
         }
         ;
 %%
