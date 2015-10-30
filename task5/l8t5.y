@@ -45,7 +45,7 @@ program:/* empty */ {
                        printf("> ");
                     }
         | program s_expr EOL {
-                              //printf("yacc: program expr\n");
+                              printf("yacc: program expr\n");
                               //printf("\n%f", eval($2));
                               //freeNode($2);
                               printf("\n> ");
@@ -54,12 +54,12 @@ program:/* empty */ {
 
 s_expr:
         NUMBER {
-                  //printf("NUMBER%lf\n", $1);
+                  printf("NUMBER%lf\n", $1);
                   //$$ = number($1);
                }
 
         | SYMBOL {
-                  //printf("SYMBOL");
+                  printf("SYMBOL");
                   //$$ = symbol($1)
         }
         | LPAREN FUNC s_expr RPAREN {
