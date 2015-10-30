@@ -5,7 +5,7 @@
 %}
 
 digit [0-9]
-number {digit}+(\.{digit}+)?
+number [+-]?{digit}+(\.{digit}+)?
 func "neg"|"abs"|"exp"|"sqrt"|"add"|"sub"|"mult"|"div"|"remainder"|"log"|"pow"|"max"|"min"|"exp2"|"cbrt"|"hypot"
 quit "quit"
 letter [a-zA-Z]
