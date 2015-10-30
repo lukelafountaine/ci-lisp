@@ -15,7 +15,6 @@ void yyerror(char *);
 
 typedef enum { NUM_TYPE, FUNC_TYPE, LET_TYPE, LET_LIST, LET_ELEM, SYM} AST_NODE_TYPE;
 typedef enum {NEG = 0, ABS, EXP, SQRT, EXP2, CBRT, ADD, SUB, MULT, DIV, MOD, LOG, POW, MAX, MIN, HYPOT} FUNC_NAMES;
-extern char *arithmeticOps;
 
 typedef struct
 {
@@ -66,17 +65,28 @@ typedef struct ast_node
    } data;
 } AST_NODE;
 
+typedef struct symbol_table_node
+{
+   char *name;
+   AST_NODE* s_expr;
+   struct symbol_table_node* next;
+
+} SYMBOL_TABLE_NODE;
+
+// functions for creating ast_nodes
 AST_NODE *number(double value);
 AST_NODE *function(char *funcName, AST_NODE *op1, AST_NODE *op2);
 AST_NODE *let(AST_NODE *let_list, AST_NODE *s_expr);
 AST_NODE *let_list(AST_NODE *let_elem, AST_NODE *let_list);
 AST_NODE *let_elem(char *symbol, AST_NODE *s_expr);
 AST_NODE *symbol(char *name);
-void insertSymbol(char* name, AST_NODE* s_expr);
+
+// functions for doing stuff with the symbol table
 double getSymbolValue(char* name);
+void insertSymbol(char* name, AST_NODE* s_expr);
 
-void freeNode(AST_NODE *p);
-
+// functions for other stuff
 double eval(AST_NODE *ast);
+void freeNode(AST_NODE *p);
 
 #endif

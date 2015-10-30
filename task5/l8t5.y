@@ -57,13 +57,13 @@ program:/* empty */ {
 s_expr:
         NUMBER
         {
-          //printf("NUMBER%lf\n", $1);
+          //printf("NUMBER: %lf\n", $1);
           $$ = number($1);
         }
 
         | SYMBOL
         {
-          //printf("SYMBOL");
+          //printf("SYMBOL %s\n", $1);
           $$ = symbol($1);
         }
         | LPAREN FUNC s_expr RPAREN
@@ -85,13 +85,13 @@ s_expr:
         }
         | QUIT
         {
-          printf("QUIT\n");
+          //printf("QUIT\n");
           exit(0);
         }
 
         | error
         {
-          printf("error\n");
+          //printf("error\n");
           //printf("> ");
         }
         ;
