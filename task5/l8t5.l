@@ -6,7 +6,10 @@
 
 digit [0-9]
 number {digit}+(\.{digit}+)?
-func "neg"|"abs"|"exp"|"sqrt"|"add"|"sub"|"mult"|"div"|"remainder"|"log"|"pow"|"max"|"min"|"exp2"|"cbrt"|"hypot"|"let"
+func "neg"|"abs"|"exp"|"sqrt"|"add"|"sub"|"mult"|"div"|"remainder"|"log"|"pow"|"max"|"min"|"exp2"|"cbrt"|"hypot"
+quit "quit"
+letter [a-zA-Z]
+symbol {letter}+
 
 %%
 
@@ -16,7 +19,21 @@ func "neg"|"abs"|"exp"|"sqrt"|"add"|"sub"|"mult"|"div"|"remainder"|"log"|"pow"|"
                 return NUMBER;
             }
 
-"quit"      { return QUIT; }
+"let"       {
+              //printf("lex: let\n");
+              return LET;
+            }
+
+"quit"      {
+              return QUIT;
+            }
+
+{symbol}    {
+                yylval.sval = (char *) malloc(strlen(yytext)*sizeof(char));
+                strcpy(yylval.sval, yytext);
+                //printf("lex: SYMBOL");
+                return SYMBOL;
+            }
 
 {func}      {
                 yylval.sval = (char *) malloc(strlen(yytext)*sizeof(char));
