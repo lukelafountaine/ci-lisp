@@ -3,12 +3,9 @@
 #include "l8t5.h"
 
 SYMBOL_TABLE_NODE *symbolTable;
-//AST_NODE* symbols[256];
 
 int main(void)
 {
-  // for (int i = 0; i < 256; i++)
-  //   symbols[i] = NULL;
   yyparse();
   return 0;
 }
@@ -50,6 +47,43 @@ double getSymbolValue(char *name)
     yyerror("invalid symbol used");
 
   return result;
+}
+
+void removeSymbol(char* name)
+{
+  // make a new node to iterate through the table
+  SYMBOL_TABLE_NODE* current = symbolTable;
+
+  if (current && !strcmp(current->name, name))
+    symbolTable = current->next;
+
+  // iterate while current is not NULL
+  while (current)
+  {
+    //check to see if this is the symbol were looking for
+    if (current->next && !strcmp(current->next->name, name)) {
+      // then delete it if it is
+      current->next = current->next->next;
+      break;
+    }
+    // otherwise keep on iterating
+    current = current->next;
+  }
+}
+
+void leaveScope(AST_NODE* root)
+{
+  // only do stuff if this node is not null
+  if(root) {
+    // if its a let_elem node, remove the symbol
+    if (root->type == LET_ELEM)
+      removeSymbol(root->data.let_elem.symbol);
+    // otherwise keep traversing
+    else {
+      leaveScope(root->data.let_list.let_elem);
+      leaveScope(root->data.let_list.let_list);
+    }
+  }
 }
 
 void yyerror(char *s)
@@ -254,7 +288,11 @@ double eval(AST_NODE *p)
   }
   // just evaluate the right side of each let
   else if (p->type == LET_TYPE)
+  {
     result = eval(p->data.let.s_expr);
+    printf("%lf\n", result);
+    leaveScope(p->data.let.let_list);
+  }
 
   else if (p->type == SYM)
     result = getSymbolValue(p->data.symbol.name);
