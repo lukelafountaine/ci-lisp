@@ -13,6 +13,7 @@ int yyparse(void);
 int yylex(void);
 void yyerror(char *);
 
+typedef enum { INTEGER, REAL } SYMBOL_TYPE;
 typedef enum { NUM_TYPE, FUNC_TYPE, LET_TYPE, SYM} AST_NODE_TYPE;
 typedef enum {NEG = 0, ABS, EXP, SQRT, EXP2, CBRT, ADD, SUB, MULT, DIV, MOD, LOG, POW, MAX, MIN, HYPOT} FUNC_NAMES;
 
@@ -37,6 +38,7 @@ typedef struct
 typedef struct symbol_ast_node
 {
    char* name;
+   SYMBOL_TYPE type;
    struct ast_node* value;
    struct symbol_ast_node* next;
 } SYMBOL_AST_NODE;

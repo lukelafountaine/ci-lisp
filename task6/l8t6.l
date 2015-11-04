@@ -7,6 +7,7 @@
 digit [0-9]
 number [+-]?{digit}+(\.{digit}+)?
 func "neg"|"abs"|"exp"|"sqrt"|"add"|"sub"|"mult"|"div"|"remainder"|"log"|"pow"|"max"|"min"|"exp2"|"cbrt"|"hypot"
+type "integer"|"real"
 quit "quit"
 letter [a-zA-Z]
 symbol {letter}+
@@ -20,12 +21,12 @@ symbol {letter}+
             }
 
 "let"       {
-              //printf("lex: let\n");
-              return LET;
+                //printf("lex: let\n");
+                return LET;
             }
 
 "quit"      {
-              return QUIT;
+                return QUIT;
             }
 
 {func}      {
@@ -33,6 +34,13 @@ symbol {letter}+
                 strcpy(yylval.sval, yytext);
                 //printf("lex: FUNC sval = %s\n", yylval.sval);
                 return FUNC;
+            }
+
+{type}      {
+                yylval.sval = (char *) malloc(strlen(yytext)*sizeof(char));
+                strcpy(yylval.sval, yytext);
+                //printf("lex: TYPE sval = %s\n", yylval.sval);
+                return TYPE;
             }
 
 {symbol}    {

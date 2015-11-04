@@ -46,7 +46,7 @@ double getSymbolValue(char *name)
   }
   // throw error if its not found
   if (!found)
-    yyerror("Warning! Invalid symbol used!\n");
+    yyerror("ERROR: Undeclared variable <%s>!\n");
 
   return result;
 }
@@ -115,7 +115,7 @@ SYMBOL_AST_NODE* let_list(SYMBOL_AST_NODE *symbol, SYMBOL_AST_NODE *let_list)
   {
     if (!strcmp(symbol->name, current->name))
     {
-      yyerror("Redeclaring a variable!");
+      printf("ERROR: redeclaration of variable <%s> attempted", symbol->name);
       current->value = symbol->value;
       found = 1;
       symbol = let_list;

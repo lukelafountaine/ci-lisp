@@ -8,9 +8,9 @@ s-expr ::= number | symbol | ( func s-expr ) | ( func s-expr s-expr ) | ( ( let 
 
 let_list ::= let_elem | let_list let_elem
 
-let_elem ::= ( type symbol s_expr )
+let_elem ::= ( type symbol s_expr ) | ( symbol s_expr )
 
-type ::= | integer | real
+type ::= integer | real
 
 symbol ::= letter+
 
@@ -35,6 +35,7 @@ digit ::= 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
 };
 
 %token <sval> FUNC
+%token <sval> TYPE
 %token <sval> SYMBOL
 %token <dval> NUMBER
 %token LPAREN RPAREN EOL QUIT LET
@@ -114,9 +115,15 @@ let_list:
         ;
 
 let_elem:
-        LPAREN SYMBOL s_expr RPAREN
+        LPAREN TYPE SYMBOL s_expr RPAREN
         {
-          //printf("LPAREN SYMBOL s_expr RPAREN\n");
+          //printf("LPAREN %s SYMBOL s_expr RPAREN\n", $2);
+          $$ = let_elem($3, $4);
+        }
+
+        | LPAREN SYMBOL s_expr RPAREN
+        {
+          //printf("LPAREN SYMBOL s_expr RPAREN\n", $2);
           $$ = let_elem($2, $3);
         }
         ;
