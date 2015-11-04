@@ -2,7 +2,7 @@
 #include <string.h>
 #include "l8t5.h"
 
-SYMBOL_TABLE_NODE *symbolTable;
+SCOPE_NODE* currentScope;
 
 int main(void)
 {
@@ -10,85 +10,57 @@ int main(void)
   return 0;
 }
 
-void insertSymbol(char* name, AST_NODE* s_expr)
+void yyerror(char *s)
 {
-  // create a new symbol table node & fill it with the given data
-  SYMBOL_TABLE_NODE* newHead = malloc(sizeof(SYMBOL_TABLE_NODE));
-  newHead->name = name;
-  newHead->s_expr = s_expr;
-
-  //make it point to the current head and then make symbolTable point to newHead
-  newHead->next = symbolTable;
-  symbolTable = newHead;
+  fprintf(stderr, "%s\n", s);
 }
 
 double getSymbolValue(char *name)
 {
   // make a new node to iterate through the table
-  SYMBOL_TABLE_NODE* current = symbolTable;
+  SCOPE_NODE* currScope = currentScope;
+  SYMBOL_AST_NODE* currentSymbol = currScope->symbols;
+
   double result = 0.0;
   int found = 0;
 
-  // iterate while current is not NULL
-  while (current)
+  // start with current scope and work up through parents
+  while(currScope)
   {
-    //check to see if this is the symbol were looking for
-    if (!strcmp(current->name, name)) {
-      // get its value, if it is
-      result = eval(current->s_expr);
-      found = 1;
-      break;
+    while (currentSymbol)
+    {
+      //check to see if this is the symbol were looking for
+      if (!strcmp(currentSymbol->name, name)) {
+        result = eval(currentSymbol->value);
+        found = 1;
+        break;
+      }
+      // otherwise keep on iterating
+      currentSymbol = currentSymbol->next;
     }
-    // otherwise keep on iterating
-    current = current->next;
+    if (found) break;
+    // move to the next scope and keep looking
+    currScope = currScope->parent;
+    if (currScope)
+      currentSymbol = currScope->symbols;
   }
   // throw error if its not found
   if (!found)
-    yyerror("invalid symbol used");
+    yyerror("Warning! Invalid symbol used!\n");
 
   return result;
 }
 
-void removeSymbol(char* name)
+void leaveScope()
 {
-  // make a new node to iterate through the table
-  SYMBOL_TABLE_NODE* current = symbolTable;
-
-  if (current && !strcmp(current->name, name))
-    symbolTable = current->next;
-
-  // iterate while current is not NULL
-  while (current)
-  {
-    //check to see if this is the symbol were looking for
-    if (current->next && !strcmp(current->next->name, name)) {
-      // then delete it if it is
-      current->next = current->next->next;
-      break;
-    }
-    // otherwise keep on iterating
-    current = current->next;
-  }
+  if(currentScope)
+    currentScope = currentScope->parent;
 }
 
-void leaveScope(AST_NODE* root)
+void enterScope(SCOPE_NODE* newScope)
 {
-  // only do stuff if this node is not null
-  if(root) {
-    // if its a let_elem node, remove the symbol
-    if (root->type == LET_ELEM)
-      removeSymbol(root->data.let_elem.symbol);
-    // otherwise keep traversing
-    else {
-      leaveScope(root->data.let_list.let_elem);
-      leaveScope(root->data.let_list.let_list);
-    }
-  }
-}
-
-void yyerror(char *s)
-{
-  fprintf(stderr, "%s\n", s);
+  newScope->parent = currentScope;
+  currentScope = newScope;
 }
 
 // find out which function it is
@@ -109,54 +81,71 @@ int resolveFunc(char *func)
 }
 
 // create a node for let
-AST_NODE *let(AST_NODE *let_list, AST_NODE *s_expr)
+AST_NODE *let(SYMBOL_AST_NODE *symbols, AST_NODE *s_expr)
 {
   AST_NODE *p;
   size_t nodeSize;
 
-  // allocate space for the fixed sie and the variable part (union)
+  // create a new scope node
+  SCOPE_NODE *localScope = malloc(sizeof(SCOPE_NODE));
+  localScope->symbols = symbols;
+
+  // allocate space for the fixed size and the variable part (union)
   nodeSize = sizeof(AST_NODE) + sizeof(LET_AST_NODE);
   if ((p = malloc(nodeSize)) == NULL)
     yyerror("out of memory");
 
+  // put scope and s_expr into the let node and return it
   p->type = LET_TYPE;
-  p->data.let.let_list = let_list;
+  p->data.let.scope = localScope;
   p->data.let.s_expr = s_expr;
-  return p;
-}
-
-// create a node for let_list
-AST_NODE *let_list(AST_NODE *let_elem, AST_NODE *let_list)
-{
-  AST_NODE *p;
-  size_t nodeSize;
-
-  // allocate space for the fixed size and the variable part (union)
-  nodeSize = sizeof(AST_NODE) + sizeof(LET_LIST_AST_NODE);
-  if ((p = malloc(nodeSize)) == NULL)
-    yyerror("out of memory");
-
-  p->type = LET_LIST;
-  p->data.let_list.let_elem = let_elem;
-  p->data.let_list.let_list = let_list;
 
   return p;
 }
 
-// create a node for let_elem
-AST_NODE *let_elem(char* symbol, AST_NODE *s_expr)
+// add the new symbol to the list and return it
+SYMBOL_AST_NODE* let_list(SYMBOL_AST_NODE *symbol, SYMBOL_AST_NODE *let_list)
 {
-  AST_NODE *p;
+  // insert the new symbol into the let_list
+  SYMBOL_AST_NODE* current = let_list;
+  int found = 0;
+
+  // check for duplicates
+  while (current)
+  {
+    if (!strcmp(symbol->name, current->name))
+    {
+      yyerror("Redeclaring a variable!");
+      current->value = symbol->value;
+      found = 1;
+      symbol = let_list;
+      break;
+    }
+    // keep looking through the list
+    current = current->next;
+  }
+
+  // otherwise add it to the front of the list
+  if (!found)
+    symbol->next = let_list;
+
+  // return the list with the new symbol
+  return symbol;
+}
+
+// create a new symbol and return it
+SYMBOL_AST_NODE *let_elem(char* symbol, AST_NODE *s_expr)
+{
+  SYMBOL_AST_NODE *p;
   size_t nodeSize;
 
-  // allocate space for the fixed size and the variable part (union)
-  nodeSize = sizeof(AST_NODE) + sizeof(LET_ELEM_AST_NODE);
+  // allocate space the symbol
+  nodeSize = sizeof(SYMBOL_AST_NODE);
   if ((p = malloc(nodeSize)) == NULL)
     yyerror("out of memory");
 
-  p->type = LET_ELEM;
-  p->data.let_elem.symbol = symbol;
-  insertSymbol(symbol, s_expr);
+  p->name = symbol;
+  p->value = s_expr;
   return p;
 }
 
@@ -289,9 +278,10 @@ double eval(AST_NODE *p)
   // just evaluate the right side of each let
   else if (p->type == LET_TYPE)
   {
+    //enter the new scope, evaluate, then leave
+    enterScope(p->data.let.scope);
     result = eval(p->data.let.s_expr);
-    printf("%lf\n", result);
-    leaveScope(p->data.let.let_list);
+    leaveScope();
   }
 
   else if (p->type == SYM)

@@ -29,6 +29,7 @@ digit ::= 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
    double dval;
    char *sval;
    struct ast_node *astNode;
+   struct symbol_ast_node* symNode;
 };
 
 %token <sval> FUNC
@@ -37,8 +38,8 @@ digit ::= 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
 %token LPAREN RPAREN EOL QUIT LET
 
 %type <astNode> s_expr
-%type <astNode> let_elem
-%type <astNode> let_list
+%type <symNode> let_elem
+%type <symNode> let_list
 
 %%
 
