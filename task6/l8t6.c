@@ -446,13 +446,16 @@ NUMBER_AST_NODE* eval(AST_NODE *p)
       exit(1);
     }
     else {
+      op1 = eval(p->data.symbol.value);
       if (p->data.symbol.type == INTEGER) {
         result->type = INTEGER;
-        result->value = round(eval(p->data.symbol.value)->value);
+        if (fmod(op1->value, 1) != 0)
+          printf("WARNING: incompatible type assignment for variable <%s>\n", p->data.symbol.name);
+        result->value = round(op1->value);
       }
       else {
         result->type = REAL;
-        result->value = eval(p->data.symbol.value)->value;
+        result->value = op1->value;
       }
     }
   }
