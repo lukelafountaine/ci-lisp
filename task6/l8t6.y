@@ -52,7 +52,7 @@ program:/* empty */ {
         | program s_expr EOL
           {
           //printf("yacc: program expr\n");
-          printf("\n%f", eval($2));
+          printf("\n%lf", eval($2)->value);
           freeNode($2);
           printf("\n> ");
           }
@@ -118,13 +118,13 @@ let_elem:
         LPAREN TYPE SYMBOL s_expr RPAREN
         {
           //printf("LPAREN %s SYMBOL s_expr RPAREN\n", $2);
-          $$ = let_elem($3, $4);
+          $$ = let_elem($2, $3, $4);
         }
 
         | LPAREN SYMBOL s_expr RPAREN
         {
           //printf("LPAREN SYMBOL s_expr RPAREN\n", $2);
-          $$ = let_elem($2, $3);
+          $$ = let_elem(NULL, $2, $3);
         }
         ;
 
