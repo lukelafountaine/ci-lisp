@@ -15,50 +15,87 @@ void yyerror(char *s)
   fprintf(stderr, "%s\n", s);
 }
 
-double getSymbolValue(char *name)
+SYMBOL_TYPE getType(char *name)
 {
-  // make a new node to iterate through the table
-  SCOPE_NODE* currScope = currentScope;
-  SYMBOL_AST_NODE* currentSymbol = currScope->symbols;
+  printf("entering getType()\n");
+  if (currentScope)
+  {
+    // make a new node to iterate through the table
+    SCOPE_NODE* currScope = currentScope;
+    SYMBOL_AST_NODE* currentSymbol = currScope->symbols;
 
-  double result = 0.0;
+    // start with current scope and work up through parents
+    while(currScope)
+    {
+      while (currentSymbol)
+      {
+        //check to see if this is the symbol were looking for
+        if (!strcmp(currentSymbol->name, name) && currentSymbol->type != INVALID) {
+          return currentSymbol->type;
+        }
+        // otherwise keep on iterating
+        currentSymbol = currentSymbol->next;
+      }
+      // move to the next scope and keep looking
+      currScope = currScope->parent;
+      if (currScope)
+        currentSymbol = currScope->symbols;
+      }
+  }
+  return INVALID;
+}
+
+SYMBOL_AST_NODE* getSymbol(char *name)
+{
+  printf("entering getSymbol()\n");
+  SYMBOL_AST_NODE *result = NULL;
   int found = 0;
 
-  // start with current scope and work up through parents
-  while(currScope)
+  // only check if there is an existing scope
+  if (currentScope)
   {
-    while (currentSymbol)
+    // make a new node to iterate through the table
+    SCOPE_NODE* currScope = currentScope;
+    SYMBOL_AST_NODE* currentSymbol = currScope->symbols;
+
+    // start with current scope and work up through parents
+    while(currScope)
     {
-      //check to see if this is the symbol were looking for
-      if (!strcmp(currentSymbol->name, name)) {
-        result = eval(currentSymbol->value);
-        found = 1;
-        break;
+      while (currentSymbol)
+      {
+        //check to see if this is the symbol were looking for
+        if (!strcmp(currentSymbol->name, name)) {
+          result = currentSymbol;
+          found = 1;
+          break;
+        }
+        // otherwise keep on iterating
+        currentSymbol = currentSymbol->next;
       }
-      // otherwise keep on iterating
-      currentSymbol = currentSymbol->next;
-    }
-    if (found) break;
-    // move to the next scope and keep looking
-    currScope = currScope->parent;
-    if (currScope)
-      currentSymbol = currScope->symbols;
+      if (found) break;
+      // move to the next scope and keep looking
+      currScope = currScope->parent;
+      if (currScope)
+        currentSymbol = currScope->symbols;
+      }
   }
   // throw error if its not found
-  if (!found)
-    yyerror("ERROR: Undeclared variable <%s>!\n");
+  else if (!found)
+    printf("ERROR: Undeclared variable <%s> used\n", name);
 
   return result;
 }
 
 void leaveScope()
 {
+  printf("entering leaveScope()\n");
   if(currentScope)
     currentScope = currentScope->parent;
 }
 
 void enterScope(SCOPE_NODE* newScope)
 {
+  printf("entering enterScope()\n");
   newScope->parent = currentScope;
   currentScope = newScope;
 }
@@ -66,6 +103,7 @@ void enterScope(SCOPE_NODE* newScope)
 // find out which function it is
 int resolveFunc(char *func)
 {
+  printf("entering resolveFunc()\n");
   char *funcs[] = { "neg", "abs", "exp", "sqrt", "exp2", "cbrt", "hypot", "add", "sub", "mult", "div", "remainder", "log", "pow", "max", "min", "print", ""};
 
   int i = 0;
@@ -80,9 +118,25 @@ int resolveFunc(char *func)
   return -1;
 }
 
+int resolveType(char* type)
+{
+  printf("entering resolveType()\n");
+  char *types[] = { "integer", "real" };
+
+  int i = 0;
+  while (types[i][0] != '\0')
+  {
+    if (!strcmp(types[i], type))
+      return i;
+    i++;
+  }
+  return -1;
+}
+
 // create a node for let
 AST_NODE *let(SYMBOL_AST_NODE *symbols, AST_NODE *s_expr)
 {
+  printf("entering let()\n");
   AST_NODE *p;
   size_t nodeSize;
 
@@ -106,6 +160,7 @@ AST_NODE *let(SYMBOL_AST_NODE *symbols, AST_NODE *s_expr)
 // add the new symbol to the list and return it
 SYMBOL_AST_NODE* let_list(SYMBOL_AST_NODE *symbol, SYMBOL_AST_NODE *let_list)
 {
+  printf("entering let_list()\n");
   // insert the new symbol into the let_list
   SYMBOL_AST_NODE* current = let_list;
   int found = 0;
@@ -115,7 +170,7 @@ SYMBOL_AST_NODE* let_list(SYMBOL_AST_NODE *symbol, SYMBOL_AST_NODE *let_list)
   {
     if (!strcmp(symbol->name, current->name))
     {
-      printf("ERROR: redeclaration of variable <%s> attempted", symbol->name);
+      printf("ERROR: redeclaration of variable <%s> attempted\n", symbol->name);
       current->value = symbol->value;
       found = 1;
       symbol = let_list;
@@ -134,8 +189,9 @@ SYMBOL_AST_NODE* let_list(SYMBOL_AST_NODE *symbol, SYMBOL_AST_NODE *let_list)
 }
 
 // create a new symbol and return it
-SYMBOL_AST_NODE *let_elem(char* symbol, AST_NODE *s_expr)
+SYMBOL_AST_NODE *let_elem(char* type, char* symbol, AST_NODE *s_expr)
 {
+  printf("entering let_elem()\n");
   SYMBOL_AST_NODE *p;
   size_t nodeSize;
 
@@ -144,6 +200,10 @@ SYMBOL_AST_NODE *let_elem(char* symbol, AST_NODE *s_expr)
   if ((p = malloc(nodeSize)) == NULL)
     yyerror("out of memory");
 
+  if (type)
+    p->type = resolveType(type);
+  else
+    p->type = INVALID;
   p->name = symbol;
   p->value = s_expr;
   return p;
@@ -152,6 +212,7 @@ SYMBOL_AST_NODE *let_elem(char* symbol, AST_NODE *s_expr)
 // create a symbol node
 AST_NODE *symbol(char* name)
 {
+  printf("entering symbol()\n");
   AST_NODE *p;
   size_t nodeSize;
 
@@ -168,6 +229,7 @@ AST_NODE *symbol(char* name)
 // create a node for a number
 AST_NODE *number(double value)
 {
+  printf("entering number()\n");
   AST_NODE *p;
   size_t nodeSize;
 
@@ -177,6 +239,7 @@ AST_NODE *number(double value)
     yyerror("out of memory");
 
   p->type = NUM_TYPE;
+  p->data.number.type = REAL;
   p->data.number.value = value;
   return p;
 }
@@ -184,6 +247,7 @@ AST_NODE *number(double value)
 // create a node for a function
 AST_NODE *function(char *funcName, AST_NODE *op1, AST_NODE *op2)
 {
+  printf("entering function()\n");
   AST_NODE *p;
   size_t nodeSize;
 
@@ -216,14 +280,21 @@ void freeNode(AST_NODE *p)
   free (p);
 }
 
-double eval(AST_NODE *p)
+NUMBER_AST_NODE* eval(AST_NODE *p)
 {
-  double result = 0.0;
+  printf("entering eval()\n");
+  NUMBER_AST_NODE* result = malloc(sizeof(NUMBER_AST_NODE));
+  NUMBER_AST_NODE* op1 = malloc(sizeof(NUMBER_AST_NODE));
+  NUMBER_AST_NODE* op2 = malloc(sizeof(NUMBER_AST_NODE));
+
   if (!p)
     return result;
 
   else if (p->type == NUM_TYPE)
-    result = p->data.number.value;
+  {
+    result = &p->data.number;
+    result->value = result->type == INTEGER ? round(result->value) : result->value;
+  }
 
   else if (p->type == FUNC_TYPE)
   {
@@ -232,49 +303,131 @@ double eval(AST_NODE *p)
     {
       //unary instructions
       case NEG:
-        result = -eval(p->data.function.op1); break;
+        result = eval(p->data.function.op1);
+        result->value = -result->value;
+        break;
       case ABS:
-        result = fabs(eval(p->data.function.op1)); break;
+        result = eval(p->data.function.op1);
+        result->value = fabs(result->value);
+        break;
       case EXP:
-        result = exp(eval(p->data.function.op1)); break;
+        result = eval(p->data.function.op1);
+        result->value = exp(result->value);
+        break;
       case SQRT:
-        result = sqrt(eval(p->data.function.op1)); break;
+        result = eval(p->data.function.op1);
+        result->value = sqrt(result->value);
+        break;
       case EXP2:
-        result = exp2(eval(p->data.function.op1)); break;
+        result = eval(p->data.function.op1);
+        result->value = exp2(result->value);
+        break;
       case CBRT:
-        result = cbrt(eval(p->data.function.op1)); break;
+        result = eval(p->data.function.op1);
+        result->value = cbrt(result->value);
+        break;
 
       //arithmetic operations
       case ADD:
-        result = eval(p->data.function.op1) + eval(p->data.function.op2); break;
+        op1 = eval(p->data.function.op1);
+        op2 = eval(p->data.function.op2);
+
+        // set the new type and value
+        result->type = ((op1->type==INTEGER) && (op2->type==INTEGER)) ? INTEGER : REAL;
+        result->value = op1->value + op2->value;
+        break;
       case SUB:
-        result = eval(p->data.function.op1) - eval(p->data.function.op2); break;
+        op1 = eval(p->data.function.op1);
+        op2 = eval(p->data.function.op2);
+        if ((op1->type==INTEGER) && (op2->type==INTEGER)) {
+          result->type = INTEGER;
+          result->value = round(op1->value - op2->value);
+        }
+        else {
+          result->type = REAL;
+          result->value = op1->value - op2->value;
+        }
+        break;
       case MULT:
-        result = eval(p->data.function.op1) * eval(p->data.function.op2); break;
+        op1 = eval(p->data.function.op1);
+        op2 = eval(p->data.function.op2);
+
+        // set the new type and value
+        result->type = ((op1->type==INTEGER) && (op2->type==INTEGER)) ? INTEGER : REAL;
+        result->value = op1->value * op2->value;
+        break;
       case DIV:
-        result = eval(p->data.function.op1) / eval(p->data.function.op2); break;
+        op1 = eval(p->data.function.op1);
+        op2 = eval(p->data.function.op2);
+
+        if ((op1->type==INTEGER) && (op2->type==INTEGER)) {
+          result->type = INTEGER;
+          result->value = round(op1->value / op2->value);
+        }
+        else {
+          result->type = REAL;
+          result->value = op1->value / op2->value;
+        }
+        break;
 
       // other binary operations
       case MOD:
-        result = remainder(eval(p->data.function.op1), eval(p->data.function.op2)); break;
+        op1 = eval(p->data.function.op1);
+        op2 = eval(p->data.function.op2);
+        result->type = ((op1->type==INTEGER) && (op2->type==INTEGER)) ? INTEGER : REAL;
+        result->value = remainder(op1->value, op2->value);
+        break;
       case LOG:
-        if (eval(p->data.function.op1) == 2.0)
-          result = log2(eval(p->data.function.op2));
-        else if (eval(p->data.function.op1) == 10.0)
-          result = log10(eval(p->data.function.op2));
-        else
+        op1 = eval(p->data.function.op1);
+        op2 = eval(p->data.function.op2);
+
+        if (op1->value == 2.0)
+          result->value = log2(op2->value);
+        else if (op1->value == 10.0)
+          result->value = log10(op2->value);
+        else {
           yyerror("invalid log base");
-      break;
+          result->value = 0.0;
+        }
+
+        if ((op1->type==INTEGER) && (op2->type==INTEGER)) {
+          result->type = INTEGER;
+          result->value = round(result->value);
+        }
+        else result->type = REAL;
+        break;
       case POW:
-        result = pow(eval(p->data.function.op1), eval(p->data.function.op2)); break;
+        op1 = eval(p->data.function.op1);
+        op2 = eval(p->data.function.op2);
+
+        result->type = ((op1->type==INTEGER) && (op2->type==INTEGER)) ? INTEGER : REAL;
+        result->value = pow(op1->value, op2->value);
+        result->value = result->type == INTEGER ? round(result->value) : result->value;
+        break;
       case MAX:
-        result = fmax(eval(p->data.function.op1), eval(p->data.function.op2)); break;
+        op1 = eval(p->data.function.op1);
+        op2 = eval(p->data.function.op2);
+        result->type = ((op1->type==INTEGER) && (op2->type==INTEGER)) ? INTEGER : REAL;
+        result->value = fmax(op1->value, op2->value);
+        break;
       case MIN:
-        result = fmin(eval(p->data.function.op1), eval(p->data.function.op2)); break;
+        op1 = eval(p->data.function.op1);
+        op2 = eval(p->data.function.op2);
+        result->type = ((op1->type==INTEGER) && (op2->type==INTEGER)) ? INTEGER : REAL;
+        result->value = fmin(op1->value, op2->value);
+        break;
       case HYPOT:
-        result = hypot(eval(p->data.function.op1), eval(p->data.function.op2)); break;
+        op1 = eval(p->data.function.op1);
+        op2 = eval(p->data.function.op2);
+        result->type = ((op1->type==INTEGER) && (op2->type==INTEGER)) ? INTEGER : REAL;
+        result->value = hypot(op1->value, op1->value);
+        break;
       case PRINT:
-        printf
+        result = eval(p->data.function.op1);
+        if (result->type == INTEGER)
+          printf("%d", (int)result->value);
+        else printf("%.2lf", result->value);
+        break;
     }
   }
   // just evaluate the right side of each let
@@ -287,7 +440,31 @@ double eval(AST_NODE *p)
   }
 
   else if (p->type == SYM)
-    result = getSymbolValue(p->data.symbol.name);
+  {
+    p->data.symbol = *getSymbol(p->data.symbol.name);
+    // if there was no type declared
+    // check with previously declared values
+    if (p->data.symbol.type == INVALID)
+      p->data.symbol.type = getType(p->data.symbol.name);
+    // if theres still no type, error
+    if (p->data.symbol.type == INVALID) {
+      printf("ERROR: undeclared variable <%s> used\n", p->data.symbol.name);
+      exit(1);
+    }
+    else {
+      op1 = eval(p->data.symbol.value);
+      if (p->data.symbol.type == INTEGER) {
+        result->type = INTEGER;
+        if (fmod(op1->value, 1) != 0)
+          printf("WARNING: incompatible type assignment for variable <%s>\n", p->data.symbol.name);
+        result->value = round(op1->value);
+      }
+      else {
+        result->type = REAL;
+        result->value = op1->value;
+      }
+    }
+  }
 
   return result;
 }
