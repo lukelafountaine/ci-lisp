@@ -15,7 +15,7 @@ void yyerror(char *);
 
 typedef enum { INVALID=-1, INTEGER, REAL } SYMBOL_TYPE;
 typedef enum { NUM_TYPE, FUNC_TYPE, LET_TYPE, SYM} AST_NODE_TYPE;
-typedef enum {NEG = 0, ABS, EXP, SQRT, EXP2, CBRT, ADD, SUB, MULT, DIV, MOD, LOG, POW, MAX, MIN, HYPOT} FUNC_NAMES;
+typedef enum {NEG = 0, ABS, EXP, SQRT, EXP2, CBRT, HYPOT, ADD, SUB, MULT, DIV, MOD, LOG, POW, MAX, MIN} FUNC_NAMES;
 
 typedef struct scope_node
 {

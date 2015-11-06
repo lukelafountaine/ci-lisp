@@ -104,7 +104,7 @@ void enterScope(SCOPE_NODE* newScope)
 int resolveFunc(char *func)
 {
   printf("entering resolveFunc()\n");
-  char *funcs[] = { "neg", "abs", "exp", "sqrt", "exp2", "cbrt", "add", "sub", "mult", "div", "remainder", "log", "pow", "max", "min", "let", ""};
+  char *funcs[] = { "neg", "abs", "exp", "sqrt", "exp2", "cbrt", "hypot", "add", "sub", "mult", "div", "remainder", "log", "pow", "max", "min", "let", ""};
 
   int i = 0;
   while (funcs[i][0] !='\0')
