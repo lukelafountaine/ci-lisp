@@ -414,8 +414,8 @@ NUMBER_AST_NODE* eval(AST_NODE *p)
       case PRINT:
         result = eval(p->data.function.op1);
         if (result->type == INTEGER)
-          printf("%d", (int)result->value);
-        else printf("%.2lf", result->value);
+          printf("%d\n", (int)result->value);
+        else printf("%.2lf\n", result->value);
         break;
     }
   }
