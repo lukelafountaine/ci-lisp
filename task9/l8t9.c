@@ -82,8 +82,10 @@ SYMBOL_AST_NODE* getSymbol(char *name)
       }
   }
   // throw error if its not found
-  else if (!found)
+  else if (!found){
     printf("ERROR: Undeclared variable <%s> used\n", name);
+    exit(1);
+  }
 
   return result;
 }
@@ -434,8 +436,8 @@ NUMBER_AST_NODE* eval(AST_NODE *p)
       case PRINT:
         result = eval(p->data.function.op1);
         if (result->type == INTEGER)
-          printf("%d", (int)result->value);
-        else printf("%.2lf", result->value);
+          printf("%d\n", (int)result->value);
+        else printf("%.2lf\n", result->value);
         break;
       case EQUAL:
         op1 = eval(p->data.function.op1);
