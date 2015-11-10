@@ -51,7 +51,6 @@ program:/* empty */ {
                     }
         | program s_expr EOL
           {
-          //printf("yacc: program expr\n");
           printf("\n%lf", eval($2)->value);
           freeNode($2);
           printf("\n> ");

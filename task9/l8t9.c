@@ -8,7 +8,7 @@ SCOPE_NODE* currentScope;
 
 int main(void)
 {
-  // set up the random number generator
+  // set up the random number generator with the time as a seed
   srand(time(NULL));
   yyparse();
   return 0;
@@ -21,7 +21,6 @@ void yyerror(char *s)
 
 SYMBOL_TYPE getType(char *name)
 {
-  //printf("entering getType()\n");
   if (currentScope)
   {
     // make a new node to iterate through the table
@@ -51,7 +50,6 @@ SYMBOL_TYPE getType(char *name)
 
 SYMBOL_AST_NODE* getSymbol(char *name)
 {
-  //printf("entering getSymbol()\n");
   SYMBOL_AST_NODE *result = NULL;
   int found = 0;
 
@@ -92,14 +90,12 @@ SYMBOL_AST_NODE* getSymbol(char *name)
 
 void leaveScope()
 {
-  //printf("entering leaveScope()\n");
   if(currentScope)
     currentScope = currentScope->parent;
 }
 
 void enterScope(SCOPE_NODE* newScope)
 {
-  //printf("entering enterScope()\n");
   newScope->parent = currentScope;
   currentScope = newScope;
 }
@@ -107,7 +103,6 @@ void enterScope(SCOPE_NODE* newScope)
 // find out which function it is
 int resolveFunc(char *func)
 {
-  //printf("entering resolveFunc()\n");
   char *funcs[] = { "neg", "abs", "exp", "sqrt", "exp2", "cbrt", "hypot", "add", "sub", "mult", "div", "remainder", "log", "pow", "max", "min", "print", "equal", "smaller", "larger", "rand", "read" ""};
 
   int i = 0;
@@ -123,7 +118,6 @@ int resolveFunc(char *func)
 
 int resolveType(char* type)
 {
-  //printf("entering resolveType()\n");
   char *types[] = { "integer", "real" };
 
   int i = 0;
@@ -139,7 +133,6 @@ int resolveType(char* type)
 // create a node for let
 AST_NODE *let(SYMBOL_AST_NODE *symbols, AST_NODE *s_expr)
 {
-  //printf("entering let()\n");
   AST_NODE *p;
   size_t nodeSize;
 
@@ -163,7 +156,6 @@ AST_NODE *let(SYMBOL_AST_NODE *symbols, AST_NODE *s_expr)
 // add the new symbol to the list and return it
 SYMBOL_AST_NODE* let_list(SYMBOL_AST_NODE *symbol, SYMBOL_AST_NODE *let_list)
 {
-  //printf("entering let_list()\n");
   // insert the new symbol into the let_list
   SYMBOL_AST_NODE* current = let_list;
   int found = 0;
@@ -194,7 +186,6 @@ SYMBOL_AST_NODE* let_list(SYMBOL_AST_NODE *symbol, SYMBOL_AST_NODE *let_list)
 // create a new symbol and return it
 SYMBOL_AST_NODE *let_elem(char* type, char* symbol, AST_NODE *s_expr)
 {
-  //printf("entering let_elem()\n");
   SYMBOL_AST_NODE *p;
   size_t nodeSize;
 
@@ -215,7 +206,6 @@ SYMBOL_AST_NODE *let_elem(char* type, char* symbol, AST_NODE *s_expr)
 // create a symbol node
 AST_NODE *symbol(char* name)
 {
-  //printf("entering symbol()\n");
   AST_NODE *p;
   size_t nodeSize;
 
@@ -232,7 +222,6 @@ AST_NODE *symbol(char* name)
 // create a node for a number
 AST_NODE *number(double value)
 {
-  //printf("entering number()\n");
   AST_NODE *p;
   size_t nodeSize;
 
@@ -250,7 +239,6 @@ AST_NODE *number(double value)
 // create a node for a function
 AST_NODE *condition(AST_NODE* condition, AST_NODE* ifTrue, AST_NODE* ifFalse)
 {
-  //printf("entering condition()\n");
   AST_NODE *p;
   size_t nodeSize;
 
@@ -270,7 +258,6 @@ AST_NODE *condition(AST_NODE* condition, AST_NODE* ifTrue, AST_NODE* ifFalse)
 // create a node for a function
 AST_NODE *function(char *funcName, AST_NODE *op1, AST_NODE *op2)
 {
-  //printf("entering function()\n");
   AST_NODE *p;
   size_t nodeSize;
 
@@ -305,7 +292,6 @@ void freeNode(AST_NODE *p)
 
 NUMBER_AST_NODE* eval(AST_NODE *p)
 {
-  //printf("entering eval()\n");
   NUMBER_AST_NODE* result = malloc(sizeof(NUMBER_AST_NODE));
   NUMBER_AST_NODE* op1 = malloc(sizeof(NUMBER_AST_NODE));
   NUMBER_AST_NODE* op2 = malloc(sizeof(NUMBER_AST_NODE));
