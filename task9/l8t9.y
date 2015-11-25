@@ -51,7 +51,8 @@ program:/* empty */ {
                     }
         | program s_expr EOL
           {
-          printf("\n%lf", eval($2)->value);
+          eval($2);
+          //printf("\n%lf", eval($2)->value);
           freeNode($2);
           printf("\n> ");
           }

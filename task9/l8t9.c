@@ -185,7 +185,7 @@ SYMBOL_AST_NODE* let_list(SYMBOL_AST_NODE *symbol, SYMBOL_AST_NODE *let_list)
   return symbol;
 }
 
-// create a new symbol and return it
+// create a new symbol node for declaration and return it
 SYMBOL_AST_NODE *let_elem(char* type, char* symbol, AST_NODE *s_expr)
 {
   SYMBOL_AST_NODE *p;

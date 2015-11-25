@@ -33,21 +33,21 @@ symbol {letter}+
             }
 
 {func}      {
-                yylval.sval = (char *) malloc(strlen(yytext)*sizeof(char));
+                yylval.sval = (char *) malloc(strlen(yytext)*sizeof(char)+1);
                 strcpy(yylval.sval, yytext);
                 //printf("lex: FUNC sval = %s\n", yylval.sval);
                 return FUNC;
             }
 
 {type}      {
-                yylval.sval = (char *) malloc(strlen(yytext)*sizeof(char));
+                yylval.sval = (char *) malloc(strlen(yytext)*sizeof(char)+1);
                 strcpy(yylval.sval, yytext);
                 //printf("lex: TYPE sval = %s\n", yylval.sval);
                 return TYPE;
             }
 
 {symbol}    {
-                yylval.sval = (char *) malloc(strlen(yytext)*sizeof(char));
+                yylval.sval = (char *) malloc(strlen(yytext)*sizeof(char)+1);
                 strcpy(yylval.sval, yytext);
                 //printf("lex: SYMBOL");
                 return SYMBOL;
