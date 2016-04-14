@@ -1,4 +1,4 @@
-# ciLisp
+# ci-lisp
 ## An interpreter for CiLisp written in C
 
 This project was for my COMP232 class - Programming Language Design. It uses flex and bison for the grammar and parsing aspects. The project begins basically as a calculator and then each task adds additional functionality. The tasks folders are there to see the progression of the project.
